@@ -1,0 +1,86 @@
+import streamlit as st
+import numpy as np
+from stl import mesh
+import io
+import math
+
+# [Your create_rounded_rectangle_mesh function remains the same]
+
+# Set page configuration
+st.set_page_config(
+    page_title="Measurement Input App",
+    page_icon="📏",
+    layout="wide"
+)
+
+# Add a title
+st.title("Measurement Input Form")
+
+# Add description
+st.write("Please enter the following measurements:")
+
+# Create two columns for a cleaner layout
+col1, col2 = st.columns(2)
+
+with col1:
+    # Input fields for width and height
+    width = st.number_input(
+        "Width (mm)",
+        min_value=0.0,
+        max_value=1000.0,
+        value=100.0,
+        step=0.1,
+        format="%.1f"
+    )
+    
+    height = st.number_input(
+        "Height (mm)",
+        min_value=0.0,
+        max_value=1000.0,
+        value=100.0,
+        step=0.1,
+        format="%.1f"
+    )
+
+with col2:
+    # Input fields for thickness and radius
+    thickness = st.number_input(
+        "Thickness (mm)",
+        min_value=0.0,
+        max_value=100.0,
+        value=10.0,
+        step=0.1,
+        format="%.1f"
+    )
+    
+    radius = st.number_input(
+        "Corner Radius (mm)",
+        min_value=0.0,
+        max_value=min(width/2, height/2),
+        value=10.0,
+        step=0.1,
+        format="%.1f"
+    )
+
+# Generate button
+if st.button("Generate STL"):
+    # Create the mesh
+    try:
+        rounded_rect = create_rounded_rectangle_mesh(width, height, thickness, radius)
+        
+        # Save the mesh to a binary file
+        stl_file = io.BytesIO()
+        rounded_rect.save(stl_file, mode=3)  # mode=3 for binary STL
+        
+        # Provide download button
+        st.download_button(
+            label="Download STL file",
+            data=stl_file.getvalue(),
+            file_name="rounded_rectangle.stl",
+            mime="application/octet-stream"
+        )
+        
+        st.success("STL file generated successfully!")
+        
+    except Exception as e:
+        st.error(f"An error occurred: {str(e)}")
